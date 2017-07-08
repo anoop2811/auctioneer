@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
@@ -19,6 +18,7 @@ import (
 	"code.cloudfoundry.org/auctioneer/auctionrunnerdelegate"
 	"code.cloudfoundry.org/auctioneer/cmd/auctioneer/config"
 	"code.cloudfoundry.org/auctioneer/handlers"
+	"code.cloudfoundry.org/auctioneer/tracer"
 	"code.cloudfoundry.org/bbs"
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/consuladapter"
@@ -146,9 +146,9 @@ func main() {
 		if err != nil {
 			logger.Fatal("invalid-tls-config", err)
 		}
-		auctionServer = http_server.NewTLSServer(cfg.ListenAddress, handlers.New(auctionRunner, logger), tlsConfig)
+		auctionServer = http_server.NewTLSServer(cfg.ListenAddress, handlers.New(auctionRunner, tracer.NewTracer(logger), logger), tlsConfig)
 	} else {
-		auctionServer = http_server.New(cfg.ListenAddress, handlers.New(auctionRunner, logger))
+		auctionServer = http_server.New(cfg.ListenAddress, handlers.New(auctionRunner, tracer.NewTracer(logger), logger))
 	}
 
 	members := grouper.Members{
@@ -220,9 +220,9 @@ func initializeDropsonde(logger lager.Logger, dropsondePort int) {
 	}
 }
 
-func initializeAuctionServer(logger lager.Logger, listenAddr string, runner auctiontypes.AuctionRunner, tlsConfig *tls.Config) ifrit.Runner {
-	return http_server.NewTLSServer(listenAddr, handlers.New(runner, logger), tlsConfig)
-}
+// func initializeAuctionServer(logger lager.Logger, listenAddr string, runner auctiontypes.AuctionRunner, tlsConfig *tls.Config) ifrit.Runner {
+// 	return http_server.NewTLSServer(listenAddr, handlers.New(runner, logger), tlsConfig)
+// }
 
 func initializeRegistrationRunner(logger lager.Logger, consulClient consuladapter.Client, clock clock.Clock, port int) ifrit.Runner {
 	registration := &api.AgentServiceRegistration{

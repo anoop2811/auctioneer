@@ -8,18 +8,19 @@ import (
 	"code.cloudfoundry.org/auctioneer"
 	"code.cloudfoundry.org/bbs/handlers/middleware"
 	"code.cloudfoundry.org/lager"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/tedsuo/rata"
 )
 
-func New(runner auctiontypes.AuctionRunner, logger lager.Logger) http.Handler {
+func New(runner auctiontypes.AuctionRunner, tracer opentracing.Tracer, logger lager.Logger) http.Handler {
 	taskAuctionHandler := logWrap(NewTaskAuctionHandler(runner).Create, logger)
 	lrpAuctionHandler := logWrap(NewLRPAuctionHandler(runner).Create, logger)
 
 	emitter := middleware.NewLatencyEmitterWrapper(&auctioneerEmitter{logger: logger})
 
 	actions := rata.Handlers{
-		auctioneer.CreateTaskAuctionsRoute: emitter.RecordLatency(taskAuctionHandler),
-		auctioneer.CreateLRPAuctionsRoute:  emitter.RecordLatency(lrpAuctionHandler),
+		auctioneer.CreateTaskAuctionsRoute: middleware.FromHTTPRequest(tracer, "createTaskAuctionsRoute", emitter.RecordLatency(taskAuctionHandler)),
+		auctioneer.CreateLRPAuctionsRoute:  middleware.FromHTTPRequest(tracer, "createLRPAuctionsRoute", emitter.RecordLatency(lrpAuctionHandler)),
 	}
 
 	handler, err := rata.NewRouter(auctioneer.Routes, actions)

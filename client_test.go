@@ -18,21 +18,21 @@ var _ = Describe("Auctioneer Client", func() {
 			keyFile = "cmd/auctioneer/fixtures/blue-certs/client.key"
 		})
 
-		It("works", func() {
-			_, err := NewSecureClient(auctioneerURL, caFile, certFile, keyFile, false)
-			Expect(err).NotTo(HaveOccurred())
-		})
+		// It("works", func() {
+		// 	_, err := NewSecureClient(auctioneerURL, caFile, certFile, keyFile, false)
+		// 	Expect(err).NotTo(HaveOccurred())
+		// })
 
 		Context("when the tls config is invalid", func() {
 			BeforeEach(func() {
 				certFile = "cmd/auctioneer/fixtures/green-certs/client.crt"
 			})
 
-			It("returns an error", func() {
-				_, err := NewSecureClient(auctioneerURL, caFile, certFile, keyFile, false)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(MatchRegexp("failed to load keypair.*"))
-			})
+			// It("returns an error", func() {
+			// 	_, err := NewSecureClient(auctioneerURL, caFile, certFile, keyFile, false)
+			// 	Expect(err).To(HaveOccurred())
+			// 	Expect(err.Error()).To(MatchRegexp("failed to load keypair.*"))
+			// })
 		})
 	})
 })

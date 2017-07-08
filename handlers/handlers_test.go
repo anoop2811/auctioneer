@@ -9,6 +9,7 @@ import (
 	fake_auction_runner "code.cloudfoundry.org/auction/auctiontypes/fakes"
 	"code.cloudfoundry.org/auctioneer"
 	"code.cloudfoundry.org/auctioneer/handlers"
+	"code.cloudfoundry.org/bbs/tracer"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
 	"code.cloudfoundry.org/rep"
@@ -38,7 +39,7 @@ var _ = Describe("Auction Handlers", func() {
 		sender = fake.NewFakeMetricSender()
 		metrics.Initialize(sender, nil)
 
-		handler = handlers.New(runner, logger)
+		handler = handlers.New(runner, tracer.NewTracer(logger), logger)
 	})
 
 	Describe("Task Handler", func() {
